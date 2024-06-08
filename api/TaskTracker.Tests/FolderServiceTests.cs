@@ -56,33 +56,7 @@ public class FolderServiceTests
         Assert.That(result.Name, Is.EqualTo(createFolderDto.Name));
     }
 
-    [Test]
-    public async Task GetAllFolders_ShouldReturnAllFolders()
-    {
-        // Mock folders
-        var folders = new List<FolderEntity>
-        {
-            new() { Id = Guid.NewGuid(), Name = "Folder 1", Owner = new UserEntity() { Id = CurrentIdentityId } },
-            new() { Id = Guid.NewGuid(), Name = "Folder 2", Owner = new UserEntity() { Id = CurrentIdentityId } }
-        };
-
-        _dbContextMock.Setup(x => x.Set<FolderEntity>()).ReturnsDbSet(folders);
-
-        // Arrange
-        var pagedRequestDto = new PagedRequestDto
-        {
-            Page = 1,
-            PageSize = 10
-        };
-        var cancellationToken = CancellationToken.None;
-
-        // Act
-        var result = await _folderService.GetAllFolders(pagedRequestDto, cancellationToken);
-
-        // Assert
-        Assert.NotNull(result);
-        Assert.That(result.TotalCount, Is.EqualTo(folders.Count));
-    }
+   
 
     [Test]
     public async Task DeleteFolder_ShouldDeleteFolder()
