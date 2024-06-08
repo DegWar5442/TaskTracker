@@ -1,0 +1,17 @@
+.tasks-container {
+  margin-top: 20px;
+}
+
+.task-card {
+  cursor: pointer;
+}
+
+.task-actions {
+  display: flex;
+  justify-content: space-between;
+}
+
+.task-icon {
+  cursor: pointer;
+  margin-right: 10px;
+}

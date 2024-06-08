@@ -1,0 +1,31 @@
+version: "3.9"
+networks:
+  tracker-app-net:
+    driver: bridge
+services:
+  app:
+    container_name: tracker
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5080:5080"
+    networks:
+      - tracker-app-net
+    depends_on:
+      - sql_server_db
+  sql_server_db:
+    container_name: sql_server
+    image: mcr.microsoft.com/mssql/server:latest
+    environment:
+      SA_PASSWORD: "YourStrong!Passw0rd"
+      ACCEPT_EULA: "Y"
+      MSSQL_PID: "Express"
+    ports:
+      - "1433:1433"
+    networks:
+      - tracker-app-net
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+volumes:
+  sqlserver-data:
