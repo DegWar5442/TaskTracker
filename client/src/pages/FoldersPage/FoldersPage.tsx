@@ -19,7 +19,9 @@ import {
 import { FaEdit, FaTrash } from "react-icons/fa";
 import "./FoldersPage.css";
 import { Link, useNavigate } from "react-router-dom";
-import show from '../../utils/SnackbarUtils';
+import show from "../../utils/SnackbarUtils";
+import { useAppSelector } from "../../redux/hooks";
+import { RootState } from "../../redux/store";
 
 const FoldersPage: React.FC = () => {
   const [folders, setFolders] = useState<FolderDto[]>([]);
@@ -31,7 +33,14 @@ const FoldersPage: React.FC = () => {
   const [newFolderName, setNewFolderName] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const user = useAppSelector((state: RootState) => state.auth.user);
 
+  useEffect(() => {
+    if (!user) {
+      navigate("/about");
+    }
+  }, [user, navigate]);
+  
   const fetchFolders = useCallback(async () => {
     try {
       setLoading(true);
@@ -91,6 +100,7 @@ const FoldersPage: React.FC = () => {
 
   const handleAddFolder = async () => {
     await createFolder({ name: newFolderName });
+    show.success("Папку успішно створено!");
     setNewFolderName("");
     setShowModal(false);
     await fetchFolders();
@@ -100,7 +110,9 @@ const FoldersPage: React.FC = () => {
     <Container className="folders-container">
       <Row className="d-flex justify-content-between align-items-center mb-4">
         <Col md={4}>
-          <h3>Папки</h3>
+          <h3>
+            <i className="bi bi-folder-fill text-primary"></i> Папки
+          </h3>
         </Col>
         <Col md={4} className="d-flex justify-content-end">
           <Button variant="primary" onClick={handleShowModal}>
@@ -126,7 +138,9 @@ const FoldersPage: React.FC = () => {
                       className="text-reset text-decoration-none"
                     >
                       <Card.Title>{folder.name}</Card.Title>
-                      <Card.Text>К-сть завдань: {folder.tasks.length}</Card.Text>
+                      <Card.Text>
+                        К-сть завдань: {folder.tasks.length}
+                      </Card.Text>
                     </Link>
                     <div className="folder-actions">
                       <FaEdit
@@ -143,39 +157,47 @@ const FoldersPage: React.FC = () => {
               </Col>
             ))}
           </Row>
-          <Row className="pagination-container d-flex justify-content-center align-items-center mt-4">
-            <Col xs="auto" className="mb-3">
-              <Button
-                variant="primary"
-                onClick={handlePreviousPage}
-                disabled={!hasPreviousPage}
-              >
-                Попередня
-              </Button>
-            </Col>
-            <Col xs="auto">
-              <Pagination>
-                {Array.from({ length: totalPages }, (_, index) => (
-                  <Pagination.Item
-                    key={index}
-                    active={index + 1 === currentPage}
-                    onClick={() => handlePageChange(index + 1)}
+          {totalPages ? (
+            <>
+              <Row className="pagination-container d-flex justify-content-center align-items-center mt-4">
+                <Col xs="auto" className="mb-3">
+                  <Button
+                    variant="primary"
+                    onClick={handlePreviousPage}
+                    disabled={!hasPreviousPage}
                   >
-                    {index + 1}
-                  </Pagination.Item>
-                ))}
-              </Pagination>
-            </Col>
-            <Col xs="auto" className="mb-3">
-              <Button
-                variant="primary"
-                onClick={handleNextPage}
-                disabled={!hasNextPage}
-              >
-                Наступна
-              </Button>
-            </Col>
-          </Row>
+                    Попередня
+                  </Button>
+                </Col>
+                <Col xs="auto">
+                  <Pagination>
+                    {Array.from({ length: totalPages }, (_, index) => (
+                      <Pagination.Item
+                        key={index}
+                        active={index + 1 === currentPage}
+                        onClick={() => handlePageChange(index + 1)}
+                      >
+                        {index + 1}
+                      </Pagination.Item>
+                    ))}
+                  </Pagination>
+                </Col>
+                <Col xs="auto" className="mb-3">
+                  <Button
+                    variant="primary"
+                    onClick={handleNextPage}
+                    disabled={!hasNextPage}
+                  >
+                    Наступна
+                  </Button>
+                </Col>
+              </Row>
+            </>
+          ) : (
+            <div className="d-flex justify-content-center align-items-center mt-4">
+              <h3>Тут поки немає папок</h3>
+            </div>
+          )}
         </>
       )}
       <Modal show={showModal} onHide={handleCloseModal}>
@@ -199,8 +221,12 @@ const FoldersPage: React.FC = () => {
           <Button variant="secondary" onClick={handleCloseModal}>
             Відмінити
           </Button>
-          <Button variant="primary" onClick={handleAddFolder}>
-            Зберегти зміни
+          <Button
+            variant="primary"
+            onClick={handleAddFolder}
+            className={`${!newFolderName ? "disabled" : ""}`}
+          >
+            Створити
           </Button>
         </Modal.Footer>
       </Modal>

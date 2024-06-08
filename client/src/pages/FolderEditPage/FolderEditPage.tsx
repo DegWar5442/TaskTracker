@@ -14,12 +14,21 @@ import {
   Form,
 } from "react-bootstrap";
 import { deleteTask } from "../../api/tasks/tasksApi";
+import { useAppSelector } from "../../redux/hooks";
+import { RootState } from "../../redux/store";
 
 const FolderEditPage: React.FC = () => {
   const { folderId } = useParams<{ folderId: string }>();
   const [folder, setFolder] = useState<FolderDto | null>(null);
   const [folderName, setFolderName] = useState<string>("");
   const navigate = useNavigate();
+  const user = useAppSelector((state: RootState) => state.auth.user);
+
+  useEffect(() => {
+    if (!user) {
+      navigate("/about");
+    }
+  }, [user, navigate]);
 
   useEffect(() => {
     const fetchFolder = async () => {
@@ -120,10 +129,14 @@ const FolderEditPage: React.FC = () => {
                       //   style={{ cursor: "pointer" }}
                     >
                       <div>
-                        {task.content}
-                        {task.isCompleted && (
+                        <span className="pe-3">{task.content}</span>
+                        {task.isCompleted ? (
                           <span className="badge bg-success ms-2">
                             Виконано
+                          </span>
+                        ): (
+                          <span className="badge bg-danger ms-2">
+                            Невиконано
                           </span>
                         )}
                       </div>

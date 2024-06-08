@@ -18,6 +18,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { PagedResultDto } from "../../api/pagedResultDto";
 import { TaskDto, FolderDto } from "../../api/folders/foldersModels";
 import show from "../../utils/SnackbarUtils";
+import { useAppSelector } from "../../redux/hooks";
+import { RootState } from "../../redux/store";
 
 const TasksPage: React.FC = () => {
   const [tasks, setTasks] = useState<TaskDto[]>([]);
@@ -32,6 +34,13 @@ const TasksPage: React.FC = () => {
   const [isCompleted, setIsCompleted] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const user = useAppSelector((state: RootState) => state.auth.user);
+
+  useEffect(() => {
+    if (!user) {
+      navigate("/about");
+    }
+  }, [user, navigate]);
 
   const fetchTasks = useCallback(async () => {
     try {
@@ -121,7 +130,10 @@ const TasksPage: React.FC = () => {
     <Container className="tasks-container">
       <Row className="d-flex justify-content-between align-items-center mb-4">
         <Col md={4}>
-          <h3>Завдання</h3>
+          <h3>
+            {" "}
+            <i className="bi bi-check2-square text-primary"></i> Завдання
+          </h3>
         </Col>
         <Col md={4} className="d-flex justify-content-end">
           <Button variant="primary" onClick={handleShowModal}>
@@ -148,11 +160,26 @@ const TasksPage: React.FC = () => {
                     >
                       <Card.Title>{task.content}</Card.Title>
                       <Card.Text>
-                        <span>Папка: {task.folder.name}</span>
-                        <br/>
-                        <span>
-                          Виконане: {task.isCompleted ? "Так" : "Ні"}
-                        </span>
+                        <Container className="p-0">
+                          <Row className="mt-4">
+                            <Col>
+                              <span>Папка: {task.folder.name}</span>
+                            </Col>
+                          </Row>
+                          <Row className="mt-2">
+                            <Col>
+                              {task.isCompleted ? (
+                                <span className="badge bg-success">
+                                  Виконано
+                                </span>
+                              ) : (
+                                <span className="badge bg-danger">
+                                  Невиконано
+                                </span>
+                              )}
+                            </Col>
+                          </Row>
+                        </Container>
                       </Card.Text>
                     </Link>
                     <div className="task-actions mt-4">
@@ -170,39 +197,47 @@ const TasksPage: React.FC = () => {
               </Col>
             ))}
           </Row>
-          <Row className="pagination-container d-flex justify-content-center align-items-center mt-4">
-            <Col xs="auto" className="mb-3">
-              <Button
-                variant="primary"
-                onClick={handlePreviousPage}
-                disabled={!hasPreviousPage}
-              >
-                Попередня
-              </Button>
-            </Col>
-            <Col xs="auto">
-              <Pagination>
-                {Array.from({ length: totalPages }, (_, index) => (
-                  <Pagination.Item
-                    key={index}
-                    active={index + 1 === currentPage}
-                    onClick={() => handlePageChange(index + 1)}
+          {totalPages ? (
+            <>
+              <Row className="pagination-container d-flex justify-content-center align-items-center mt-4">
+                <Col xs="auto" className="mb-3">
+                  <Button
+                    variant="primary"
+                    onClick={handlePreviousPage}
+                    disabled={!hasPreviousPage}
                   >
-                    {index + 1}
-                  </Pagination.Item>
-                ))}
-              </Pagination>
-            </Col>
-            <Col xs="auto" className="mb-3">
-              <Button
-                variant="primary"
-                onClick={handleNextPage}
-                disabled={!hasNextPage}
-              >
-                Наступна
-              </Button>
-            </Col>
-          </Row>
+                    Попередня
+                  </Button>
+                </Col>
+                <Col xs="auto">
+                  <Pagination>
+                    {Array.from({ length: totalPages }, (_, index) => (
+                      <Pagination.Item
+                        key={index}
+                        active={index + 1 === currentPage}
+                        onClick={() => handlePageChange(index + 1)}
+                      >
+                        {index + 1}
+                      </Pagination.Item>
+                    ))}
+                  </Pagination>
+                </Col>
+                <Col xs="auto" className="mb-3">
+                  <Button
+                    variant="primary"
+                    onClick={handleNextPage}
+                    disabled={!hasNextPage}
+                  >
+                    Наступна
+                  </Button>
+                </Col>
+              </Row>
+            </>
+          ) : (
+            <div className="d-flex justify-content-center align-items-center mt-4">
+              <h3>Тут поки немає завдань</h3>
+            </div>
+          )}
         </>
       )}
       <Modal show={showModal} onHide={handleCloseModal}>
@@ -220,7 +255,7 @@ const TasksPage: React.FC = () => {
                 onChange={(e) => setNewTaskContent(e.target.value)}
               />
             </Form.Group>
-            <Form.Group controlId="formTaskFolder">
+            <Form.Group controlId="formTaskFolder" className="mt-3">
               <Form.Label>Папка</Form.Label>
               <Form.Control
                 as="select"
@@ -235,7 +270,7 @@ const TasksPage: React.FC = () => {
                 ))}
               </Form.Control>
             </Form.Group>
-            <Form.Group controlId="formTaskCompleted">
+            <Form.Group controlId="formTaskCompleted" className="mt-3">
               <Form.Check
                 type="checkbox"
                 label="Виконано"
@@ -260,7 +295,7 @@ const TasksPage: React.FC = () => {
                 : ""
             }`}
           >
-            Зберегти Зміни
+            Створити
           </Button>
         </Modal.Footer>
       </Modal>

@@ -43,17 +43,17 @@ public class TaskService(IDbContext dbContext, IMapper mapper, ICurrentIdentity 
 
     public async Task<PagedResultDto<TaskDto>> GetAllTasks(PagedRequestDto pagedRequestDto, CancellationToken cancellationToken)
     {
-        var query = Tasks;
-
-        var totalItems = await query.CountAsync(cancellationToken);
-
-        var tasks = await query
+        var tasks = await Tasks
             .Where(x => x.Folder.OwnerId == currentIdentity.GetUserGuid())
             .Include(x => x.Folder)
             .OrderByDescending(x => x.CreatedAt)
             .Skip((pagedRequestDto.Page - 1) * pagedRequestDto.PageSize)
             .Take(pagedRequestDto.PageSize)
             .ToListAsync(cancellationToken);
+
+        var totalItems = await Tasks
+            .Where(x => x.Folder.OwnerId == currentIdentity.GetUserGuid())
+            .CountAsync(cancellationToken);
 
         return new PagedResultDto<TaskDto>(
             pagedRequestDto.Page,

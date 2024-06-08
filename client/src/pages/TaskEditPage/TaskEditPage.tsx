@@ -17,6 +17,8 @@ import {
   Col,
   Form,
 } from "react-bootstrap";
+import { useAppSelector } from "../../redux/hooks";
+import { RootState } from "../../redux/store";
 
 const TaskEditPage: React.FC = () => {
   const { taskId } = useParams<{ taskId: string }>();
@@ -26,6 +28,13 @@ const TaskEditPage: React.FC = () => {
   const [selectedFolder, setSelectedFolder] = useState<string>("");
   const [folders, setFolders] = useState<FolderDto[]>([]);
   const navigate = useNavigate();
+  const user = useAppSelector((state: RootState) => state.auth.user);
+
+  useEffect(() => {
+    if (!user) {
+      navigate("/about");
+    }
+  }, [user, navigate]);
 
   useEffect(() => {
     const fetchTask = async () => {
@@ -90,7 +99,7 @@ const TaskEditPage: React.FC = () => {
                     onChange={(e) => setTaskContent(e.target.value)}
                   />
                 </Form.Group>
-                <Form.Group controlId="taskFolder">
+                <Form.Group controlId="taskFolder" className="mt-3">
                   <Form.Label>Папка</Form.Label>
                   <Form.Control
                     as="select"
@@ -104,7 +113,7 @@ const TaskEditPage: React.FC = () => {
                     ))}
                   </Form.Control>
                 </Form.Group>
-                <Form.Group controlId="taskCompleted">
+                <Form.Group controlId="taskCompleted" className="mt-3">
                   <Form.Check
                     type="checkbox"
                     label="Виконано"
@@ -125,22 +134,30 @@ const TaskEditPage: React.FC = () => {
           <Col md={6}>
             <Card>
               <Card.Body>
-                <div className="mb-2">
-                  <span className="me-2">
-                    <i className="bi bi-folder-fill text-primary"></i> Папка:{" "}
-                    {task.folder.name}
-                  </span>
-                  <span>
-                    <i
-                      className={`bi ${
-                        isCompleted
-                          ? "bi-check-circle-fill text-success"
-                          : "bi-x-circle-fill text-danger"
-                      }`}
-                    ></i>{" "}
-                    Виконано: {isCompleted ? "Так" : "Ні"}
-                  </span>
-                </div>
+                <Container>
+                  <Row className="mb-2">
+                    <Col>
+                      <span className="me-2">
+                        <i className="bi bi-folder-fill text-primary"></i>{" "}
+                        Папка: {task.folder.name}
+                      </span>
+                    </Col>
+                  </Row>
+                  <Row>
+                    <Col>
+                      <span>
+                        <i
+                          className={`bi ${
+                            isCompleted
+                              ? "bi-check-circle-fill text-success"
+                              : "bi-x-circle-fill text-danger"
+                          }`}
+                        ></i>{" "}
+                        {isCompleted ? "Виконано" : "Невиконано"}
+                      </span>
+                    </Col>
+                  </Row>
+                </Container>
               </Card.Body>
             </Card>
           </Col>

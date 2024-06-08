@@ -24,7 +24,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<ICurrentIdentity, CurrentIdentity>();
 
-/*builder.Services.AddCors(options =>
+builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy => policy
         .WithOrigins("http://localhost:3000")
@@ -32,7 +32,7 @@ builder.Services.AddScoped<ICurrentIdentity, CurrentIdentity>();
         .AllowAnyMethod()
         .AllowCredentials()
     );
-});*/
+});
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddIdentity<UserEntity, RoleEntity>()
@@ -59,7 +59,7 @@ await app.SeedData();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-//app.UseCors();
+app.UseCors();
 
 // Configure the HTTP request pipeline.
 //if (app.Environment.IsDevelopment())

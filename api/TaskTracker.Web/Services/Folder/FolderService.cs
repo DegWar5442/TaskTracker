@@ -36,11 +36,11 @@ public class FolderService(IDbContext dbContext, IMapper mapper, ICurrentIdentit
 
     public async Task<PagedResultDto<FolderDto>> GetAllFolders(PagedRequestDto pagedRequestDto, CancellationToken cancellationToken)
     {
-        var query = Folders;
+        var totalItems = await Folders
+            .Where(x => x.OwnerId == currentIdentity.GetUserGuid())
+            .CountAsync(cancellationToken);
 
-        var totalItems = await query.CountAsync(cancellationToken);
-
-        var folders = await query
+        var folders = await Folders
             .Where(x => x.OwnerId == currentIdentity.GetUserGuid())
             .Include(x => x.Tasks)
             .OrderByDescending(x => x.CreatedAt)

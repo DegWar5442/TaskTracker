@@ -15,8 +15,6 @@ export const Header: React.FC = () => {
 
   const signOut = () => {
     dispatch(clearAuth());
-    // show.info('You have been signed out.');
-    window.location.reload();
     navigate("/", { replace: true });
   };
 
@@ -38,17 +36,18 @@ export const Header: React.FC = () => {
               <ul className="navbar-nav me-auto">
                 <li className="nav-item">
                   <NavLink className="nav-link" to="folders">
-                    Папки
+                    <i className="bi bi-folder-fill text-primary"></i> Папки
                   </NavLink>
                 </li>
                 <li className="nav-item">
                   <NavLink className="nav-link" to="tasks">
+                    <i className="bi bi-check2-square text-primary"></i>{" "}
                     Завдання
                   </NavLink>
                 </li>
                 <li className="nav-item">
                   <NavLink className="nav-link" to="/about">
-                    Про Нас
+                    <i className="bi bi-person-circle text-info"></i> Про Нас
                   </NavLink>
                 </li>
               </ul>
@@ -57,7 +56,9 @@ export const Header: React.FC = () => {
             )}
             {isLoggedIn ? (
               <>
-                <span className="navbar-text me-3 fw-bold">Ласкаво просимо, {userName}!</span>
+                <span className="navbar-text me-3 fw-bold">
+                  Ласкаво просимо, {userName}!
+                </span>
                 <Button variant="primary" className="ms-3" onClick={signOut}>
                   Вихід
                 </Button>

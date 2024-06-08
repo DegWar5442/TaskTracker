@@ -10,12 +10,38 @@ import { useAppDispatch } from '../../redux/hooks';
 const RegisterPage: React.FC = () => {
   const [login, setLogin] = useState('');
   const [password, setPassword] = useState('');
+  const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
+  const validatePassword = (password: string): string[] => {
+    const errors = [];
+    if (!/(?=.*[a-z])/.test(password)) {
+      errors.push('Пароль має містити хоча б одну малу літеру');
+    }
+    if (!/(?=.*[A-Z])/.test(password)) {
+      errors.push('Пароль має містити хоча б одну велику літеру');
+    }
+    if (!/(?=.*\d)/.test(password)) {
+      errors.push('Пароль має містити хоча б одну цифру');
+    }
+    if (!/(?=.*[#$^+=!*()@%&])/.test(password)) {
+      errors.push('Пароль має містити хоча б один спеціальний символ');
+    }
+    if (!/.{8,}/.test(password)) {
+      errors.push('Пароль має містити принаймні 8 символів');
+    }
+    return errors;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const passwordValidationErrors = validatePassword(password);
+    if (passwordValidationErrors.length > 0) {
+      setPasswordErrors(passwordValidationErrors);
+      return;
+    }
 
     try {
       const model: RegisterRequest = {
@@ -25,6 +51,7 @@ const RegisterPage: React.FC = () => {
       setIsLoading(true);
       const response = await register(model);
       dispatch(setAuth({ token: response.token, user: response.user }));
+      show.success('Акаунт успішно створено');
 
       navigate('/');
     } catch (error) {
@@ -66,8 +93,17 @@ const RegisterPage: React.FC = () => {
                 type="password"
                 placeholder="Введіть ваш пароль"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setPasswordErrors([]); // Clear error messages on change
+                }}
+                isInvalid={passwordErrors.length > 0}
               />
+              <Form.Control.Feedback type="invalid">
+                {passwordErrors.map((error, index) => (
+                  <div key={index}>{error}</div>
+                ))}
+              </Form.Control.Feedback>
             </Form.Group>
 
             <Button
